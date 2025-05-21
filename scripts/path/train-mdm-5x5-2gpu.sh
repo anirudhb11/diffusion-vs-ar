@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --gres=gpu:l40s:2
+#SBATCH --gres=gpu:2
 #SBATCH --cpus-per-gpu=3
 #SBATCH --nodes=1
 #SBATCH --mem=36G
@@ -7,7 +7,7 @@
 #SBATCH --error="/home/mila/b/buvanesa/code/nano-vppo/logs/err_%j.err"
 #SBATCH --partition=long
 #SBATCH --job-name=test
-
+#SBATCH --constraint="80gb"
 
 export WANDB_DISABLED=true
 module load anaconda/3
@@ -15,24 +15,24 @@ module load cuda/12.4.0/cudnn/8.9
 conda activate diffusion
 cd /home/mila/b/buvanesa/code/mini-rl-project/diff-vs-ar/
 
-exp=output/path/mdm-alpha0.25-gamma1-bs1024-lr3e-4-ep1200-T20-ep-1200`date "+%Y%m%d-%H%M%S"`
+exp=output/path/mdm-alpha0.25-gamma1-bs1024-lr3e-4-ep1200-T20-ep-1200-5x5-medium`date "+%Y%m%d-%H%M%S"`
 mkdir -p $exp
 
 CUDA_VISIBLE_DEVICES=0,1 \
-accelerate launch --multi_gpu  --num_machines 1 --mixed_precision fp16 --num_processes 2 --main_process_port 20099 \
+accelerate launch --multi_gpu  --num_machines 1 --mixed_precision fp16 --num_processes 2 --main_process_port 20199 \
 src/train_bash.py \
     --stage mdm --overwrite_output_dir \
     --cache_dir ./cache \
-    --model_name_or_path model_config_tiny \
+    --model_name_or_path model_config_medium \
     --do_train \
     --dataset path_train \
-    --max_samples 50000 \
+    --max_samples 200000 \
     --finetuning_type full \
-    --cutoff_len 75 \
+    --cutoff_len 250 \
     --output_dir $exp \
     --overwrite_cache \
-    --per_device_train_batch_size 512 \
-    --gradient_accumulation_steps 1 \
+    --per_device_train_batch_size 128 \
+    --gradient_accumulation_steps 4 \
     --lr_scheduler_type cosine \
     --logging_steps 1 \
     --val_size 448 \
@@ -41,7 +41,7 @@ src/train_bash.py \
     --eval_steps 100 \
     --save_steps 500 \
     --learning_rate 1e-3 \
-    --num_train_epochs 1200.0 \
+    --num_train_epochs 5000.0 \
     --plot_loss \
     --run_name ${dataset}_prefix \
     --preprocessing_num_workers 8 \
@@ -67,7 +67,7 @@ python3 -u src/train_bash.py \
     --cache_dir ./cache \
     --model_name_or_path model_config_tiny \
     --do_predict \
-    --cutoff_len 75 \
+    --cutoff_len 250 \
     --dataset $dataset \
     --finetuning_type full \
     --diffusion_steps 20 \

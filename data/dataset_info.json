@@ -1,0 +1,22 @@
+{
+    
+    "path_train": {
+      "file_name": "star_graph_deg_5_path_5_nodes_300_path_test.jsonl",
+      "columns": {
+        "prompt": "input",
+        "query": "",
+        "response": "output",
+        "history": ""
+      }
+    },
+    "path_test": {
+      "file_name": "star_graph_deg_5_path_5_nodes_300_path_test.jsonl",
+      "columns": {
+        "prompt": "input",
+        "query": "",
+        "response": "output",
+        "history": ""
+      }
+    }
+  }
+  
